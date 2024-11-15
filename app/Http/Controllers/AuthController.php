@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+
+    // fungsi untuk registrasi pengguna baru
     public function register(Request $request)
     {
         # menangkap inputan
@@ -27,22 +29,24 @@ class AuthController extends Controller
         return response()->json($data, 200);
     }
 
+
+    // Fungsi untuk login pengguna.
     public function login(Request $request)
     {
-        # menangkap inputan
+        // menangkap inputan
         $input = [
             'email' => $request->email,
             'password' => $request->password,
         ];
 
-        # mengambil data user (DB)
+        // mengambil data user (DB)
         $user = User::where('email', $input['email'])->first();
 
-        # membandingkan user dgn data user (DB)
+        // membandingkan user dgn data user (DB)
         $isLoginSuccessfully = ($input['email'] == $user->email && Hash::check($input['password'], $user->password));
 
         if ($isLoginSuccessfully) {
-            # membuat token
+            // membuat token
             $token = $user->createToken('auth_token');
 
             $data = [

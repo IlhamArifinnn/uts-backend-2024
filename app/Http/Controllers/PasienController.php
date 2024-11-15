@@ -10,6 +10,12 @@ use Mockery\Generator\StringManipulation\Pass\Pass;
 class PasienController extends Controller
 {
 
+
+    /**
+    Menampilkan semua pasien yang ada di database.
+    Hanya bisa diakses oleh pengguna yang sudah login.
+    Mengembalikan data pasien dalam format JSON dengan status 200 (OK).
+     */
     public function index()
     {
         $pasien = Pasien::all();
@@ -28,14 +34,19 @@ class PasienController extends Controller
         return response()->json($data, 200);
     }
 
+
+    /**
+      Menyimpan data pasien baru.
+      Hanya bisa diakses oleh pengguna yang sudah login.
+      Mengembalikan data pasien yang baru dibuat dan pesan sukses dengan status 201 (Created).
+     */
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'name' => 'string|required',
             'phone' => 'string|required',
             'address' => 'string|required',
-            'status' => 'string|required',
+            'status' => 'string|required|in:positive,recovered,dead',
             'in_date_at' => 'required|date',
         ]);
 
@@ -56,6 +67,13 @@ class PasienController extends Controller
         return response()->json($data, 201);
     }
 
+
+    /**
+     * Memperbarui data pasien yang sudah ada berdasarkan ID.
+     * Hanya bisa diakses oleh pengguna yang sudah login.
+     * Data yang diterima harus melalui proses validasi terlebih dahulu.
+     * Mengembalikan data pasien yang telah diperbarui dan pesan sukses dengan status 200 (OK).
+     */
     public function update(Request $request, $id)
     {
         $pasien = Pasien::find($id);
@@ -86,6 +104,12 @@ class PasienController extends Controller
         }
     }
 
+
+    /**
+     * Menghapus pasien tertentu berdasarkan ID.
+     * Hanya bisa diakses oleh pengguna yang sudah login.
+     * Mengembalikan pesan sukses dengan status 200 (OK) setelah berita dihapus.
+     */
     public function destroy($id)
     {
         $pasien = Pasien::find($id);
@@ -107,6 +131,12 @@ class PasienController extends Controller
         }
     }
 
+
+    /**
+     * Menampilkan pasien tertentu berdasarkan ID.
+     * Hanya bisa diakses oleh pengguna yang sudah login.
+     * Mengembalikan data pasien yang diminta dalam format JSON dengan status 200 (OK).
+     */
     public function show($id)
     {
         $pasien = Pasien::find($id);
@@ -141,6 +171,66 @@ class PasienController extends Controller
         } else {
             $data = [
                 'message' => 'No patient found',
+            ];
+            return response()->json($data, 404);
+        }
+    }
+
+
+    /** Menampilkan semua pasien dengan status positif */
+    public function positive()
+    {
+        $pasien = Pasien::where('status', 'positive')->get();
+
+        if ($pasien->count() > 0) {
+            $data = [
+                'message' => 'Get positive patients status',
+                'total' => $pasien->count(),
+                'data' => $pasien
+            ];
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'No positive patients found',
+            ];
+            return response()->json($data, 404);
+        }
+    }
+
+    /** Menampilkan semua pasien dengan status sembuh */
+    public function recovered()
+    {
+        $pasien = Pasien::where('status', 'recovered')->get();
+
+        if ($pasien->count() > 0) {
+            $data = [
+                'message' => 'Get recovered patient',
+                'total' => $pasien->count(),
+                'data' => $pasien
+            ];
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'No recovered patients found',
+            ];
+            return response()->json($data, 404);
+        }
+    }
+
+    public function dead()
+    {
+        $pasien = Pasien::where('status', 'dead')->get();
+
+        if ($pasien->count() > 0) {
+            $data = [
+                'message' => 'Get dead patients',
+                'total' => $pasien->count(),
+                'data' => $pasien
+            ];
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'No deceased patients found',
             ];
             return response()->json($data, 404);
         }
